@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\Technology;
 use App\Models\Type;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -26,7 +27,8 @@ class ProjectController extends Controller
     public function create()
     {
         $types = Type::all();
-        return view('admin.projects.create', compact('types'));
+        $technologies = Technology::all();
+        return view('admin.projects.create', compact('types', 'technologies'));
     }
 
     /**
@@ -34,12 +36,19 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'type_id' => 'nullable|exists:types,id'
+        $valid = $request->validate([
+            'type_id' => 'nullable|exists:types,id',
+            'technology.*' => 'exists:technologies,id'
         ]);
+
         $data = $request->all();
+        $technology_ids = ($request->has('technology')) ? $request->get('technology') : [];
         $data['slug'] = Str::slug($data['title'], '_');
         $new_project = Project::create($data);
+
+        if (count($technology_ids)) {
+            $new_project->technologies()->attach($technology_ids);
+        }
 
         return redirect()->route('admin.projects.show', $new_project);
         //dd($request->all());
@@ -60,7 +69,9 @@ class ProjectController extends Controller
     public function edit(Project $project)
     {
         $types = Type::orderBy('name', 'ASC')->get();
-        return view('admin.projects.edit', compact('project','types'));
+
+        $technologies = Technology::all();
+        return view('admin.projects.edit', compact('project', 'types', 'technologies'));
     }
 
     /**

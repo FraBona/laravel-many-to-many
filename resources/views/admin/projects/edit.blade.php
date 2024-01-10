@@ -17,6 +17,18 @@
         @endforeach
       </select>
 
+      <div class="form-group">
+        <p>Seleziona le tecnologie:</p>
+        <div class="d-flex flex-wrap">
+          @foreach ($technologies as $technology)
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" value="{{$technology->id}}" name="technology[]" id="technology-{{$technology->id}}" @checked(in_array($technology->id, old('techonologies',$project->technologies->pluck('id')->all())))>
+              <label for="technology-{{$technology->id}}" class="form-check-label">{{$technology->name}}</label>
+            </div>
+          @endforeach
+        </div>
+      </div>
+
       <input type="submit" class="btn btn-primary">
     </form>
 
