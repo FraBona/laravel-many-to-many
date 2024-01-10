@@ -79,9 +79,19 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
+        $request->validate([
+            'technology.*' => 'exists:technologies,id'
+        ]);
+
         $data = $request->all();
         $data['slug'] = Str::slug($data['title'], '_');
         $project->update($data);
+
+        if($request->has('technology')){
+            $project->technologies()->sync($data['technology']);
+        }else{
+            $project->technologies()->detach();
+        }
 
         return redirect()->route('admin.projects.show', $project);
     }
